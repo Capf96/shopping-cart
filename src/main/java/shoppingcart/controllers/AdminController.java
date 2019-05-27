@@ -15,7 +15,6 @@ import java.security.Principal;
 public class AdminController {
     @GetMapping
     public String adminPage(Model model, Principal principal) {
-
         User loggedUser = (User) ((Authentication) principal).getPrincipal();
 
         String userInfo = WebUtils.toString(loggedUser);

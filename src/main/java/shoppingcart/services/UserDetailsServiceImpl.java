@@ -9,8 +9,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import shoppingcart.models.AppUser;
-import shoppingcart.repository.AppRoleDAO;
-import shoppingcart.repository.AppUserDAO;
+import shoppingcart.repository.JpaAppUserRepository;
+import shoppingcart.repository.JpaUserRoleRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,14 +18,14 @@ import java.util.List;
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
     @Autowired
-    private AppUserDAO appUserDAO;
+    private JpaAppUserRepository appUserRepo;
 
     @Autowired
-    private AppRoleDAO appRoleDAO;
+    private JpaUserRoleRepository userRoleRepo;
 
     @Override
     public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
-        AppUser appUser = this.appUserDAO.findByUsername(userName);
+        AppUser appUser = this.appUserRepo.getByUsername(userName);
 
         if (appUser == null) {
             System.out.println("User not found! " + userName);
@@ -34,7 +34,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         System.out.println("Found User: " + appUser);
 
-        List<String> roleNames = this.appRoleDAO.getRoleNames(appUser.getUserId());
+        List<String> roleNames = this.userRoleRepo.getRoleNameByUserId(appUser.getUserId());
 
         List<GrantedAuthority> grantList = new ArrayList<>();
         if (roleNames != null) {
