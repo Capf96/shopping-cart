@@ -60,7 +60,7 @@ public class UsersRequestsService {
 
     // POST
 
-    public AppUserResponse managePost(AppUserRequest user) {
+    public ResponseEntity<AppUserResponse> managePost(AppUserRequest user) {
         AppUser exists = appUserRepo.findByUsername(user.getUsername());
         if (exists != null) throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED, "Username already in use");
 
@@ -69,9 +69,10 @@ public class UsersRequestsService {
                             .enabled(1).firstName(user.getFirstName()).lastName(user.getLastName())
                             .phoneNumber(user.getPhoneNumber()).money(user.getMoney()).build();
         AppUser inserted = appUserRepo.save(newUser);
-        return AppUserResponse.builder().userId(inserted.getUserId()).username(inserted.getUsername())
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                AppUserResponse.builder().userId(inserted.getUserId()).username(inserted.getUsername())
                 .email(inserted.getEmail()).firstName(inserted.getFirstName()).lastName(inserted.getLastName())
-                .phoneNumber(inserted.getPhoneNumber()).money(inserted.getMoney()).build();
+                .phoneNumber(inserted.getPhoneNumber()).money(inserted.getMoney()).build());
     }
 
     // DELETE

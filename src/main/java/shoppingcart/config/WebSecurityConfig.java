@@ -7,6 +7,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
@@ -48,8 +49,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests().antMatchers("/userInfo")
                 .access("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER', 'ROLE_ADMIN')");
 
-        // http.authorizeRequests().antMatchers("/users/")
-        //         .access("hasAnyRole('ROLE_ADMIN')");
+        http
+//                .sessionManagement()
+//                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+//                .and()
+                // We add this exception handling so the request is not authorized it won't be redirected to login page
+//                .exceptionHandling()
+//                .authenticationEntryPoint(restAuthenticationEntryPoint)
+//                .and()
+                .authorizeRequests()
+                .antMatchers("/users/")
+                .access("hasAnyRole('ROLE_ADMIN')");
 
         // http.authorizeRequests().antMatchers("/users/{username}/")
         //         .access("@userSecurity.hasUsername(authentication, #username) or hasRole('ROLE_ADMIN')");

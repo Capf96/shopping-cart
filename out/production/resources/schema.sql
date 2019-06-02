@@ -1,44 +1,103 @@
-create table app_user
+create table APP_USER
 (
-  user_id BIGINT not null,
-  username VARCHAR(50) not null,
-  encrypted_password VARCHAR(128) not null,
-  enabled INT not null,
-  primary key (user_id),
-  unique (username)
+  USER_ID           BIGINT not null,
+  USERNAME         VARCHAR(36) not null,
+  ENCRYPTED_PASSWORD VARCHAR(128) not null,
+  ENABLED           Int not null,
+  EMAIL            VARCHAR(128) not null,
+  CREATED_AT       date now(),
+  UPDATED_AT       date now(),
+  FIRST_NAME       VARCHAR(128),
+  LAST_NAME        VARCHAR(128),
+  PHONE_NUMBER     VARCHAR(17),
+  MONEY            double
+);
+--
+alter table APP_USER
+  add constraint APP_USER_PK primary key (USER_ID);
+
+alter table APP_USER
+  add constraint APP_USER_UK unique (USERNAME);
+
+
+-- Create table
+create table APP_ROLE
+(
+  ROLE_ID   BIGINT not null,
+  ROLE_NAME VARCHAR(30) not null
+);
+--
+alter table APP_ROLE
+  add constraint APP_ROLE_PK primary key (ROLE_ID);
+
+alter table APP_ROLE
+  add constraint APP_ROLE_UK unique (ROLE_NAME);
+
+
+-- Create table
+create table USER_ROLE
+(
+  ID      BIGINT not null,
+  USER_ID BIGINT not null,
+  ROLE_ID BIGINT not null
+);
+--
+alter table USER_ROLE
+  add constraint USER_ROLE_PK primary key (ID);
+
+alter table USER_ROLE
+  add constraint USER_ROLE_UK unique (USER_ID, ROLE_ID);
+
+alter table USER_ROLE
+  add constraint USER_ROLE_FK1 foreign key (USER_ID)
+  references APP_USER (USER_ID) on delete cascade;
+
+alter table USER_ROLE
+  add constraint USER_ROLE_FK2 foreign key (ROLE_ID)
+  references APP_ROLE (ROLE_ID) on delete cascade;
+
+create table RATINGS
+(
+  RATING_ID BIGINT not null,
+  RATED     BIGINT not null,
+  RATER     BIGINT not null,
+  RATING    Int    not null
 );
 
-create table app_role
-(
-  role_id BIGINT not null,
-  role_name VARCHAR(30) not null,
-  primary key (role_id),
-  unique (role_name)
+alter table RATINGS
+  add constraint RATING_PK primary key (RATING_ID);
+
+alter table RATINGS
+  add constraint RATING_FK1 foreign key (RATED)
+  references APP_USER (USER_ID) on delete cascade;
+
+alter table RATINGS
+  add constraint RATING_FK2 foreign key (RATER)
+  references APP_USER (USER_ID) on delete cascade;
+
+-- Used by Spring Remember Me API.
+CREATE TABLE Persistent_Logins (
+    username varchar(64) not null,
+    series varchar(64) not null,
+    token varchar(64) not null,
+    last_used timestamp not null,
+    PRIMARY KEY (series)
 );
 
-create table user_role
-(
-  id BIGINT not null,
-  user_id BIGINT not null,
-  role_id BIGINT not null,
-  primary key (id),
-  unique (user_id),
-  unique (role_id),
-  foreign key (user_id) references app_user(user_id),
-  foreign key (role_id) references app_role(role_id)
-);
-
-create table Persisten_Logins
-(
-  username VARCHAR(64) not null,
-  series VARCHAR(64) not null,
-  token VARCHAR(64) not null,
-  last_used TIMESTAMP not null,
-  primary key (username)
-);
+------------------------
 
 insert into app_role (role_id, role_name) values (1, 'ROLE_ADMIN');
 
 insert into app_role (role_id, role_name) values (2, 'ROLE_SELLER');
 
 insert into app_role (role_id, role_name) values (3, 'ROLE_BUYER');
+
+insert into app_user (user_id, username, encrypted_password, enabled) values (2, 'user', '$2a$10$PrI5Gk9L.tSZiW9FXhTS8O8Mz9E97k2FZbFvGFFaSsiTUIl.TCrFu', 1);
+
+insert into app_user (user_id, username, encrypted_password, enabled) values (1, 'admin', '$2a$10$PrI5Gk9L.tSZiW9FXhTS8O8Mz9E97k2FZbFvGFFaSsiTUIl.TCrFu', 1);
+
+insert into user_role (id, user_id, role_id) values (1, 1, 1);
+
+insert into user_role (id, user_id, role_id) values (2, 1, 2);
+
+insert into user_role (id, user_id, role_id) values (3, 2, 2);
