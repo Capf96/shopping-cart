@@ -1,0 +1,56 @@
+Users
+GET    /users/              Done
+GET    /users/{username}/   Done
+POST   /users/              Done
+PATCH  /users/{username}/   Done
+DELETE /users/{username}/   Done
+
+Roles
+GET    /users/{username}/roles/            Done
+PUT    /users/{username}/roles/            Done
+DELETE /users/{username}/roles/{rolename}  Done
+
+Rating
+GET    /users/{username}/ratings/           Done
+PUT    /users/{username}/ratings/           Done
+PATCH  /users/{username}/ratings/{ratingid} Done
+DELETE /users/{username}/ratings/{ratingid} Done
+
+Trust
+Se van TODO
+PUT     /users/{username}/trust/       Seller  Yo confio en             
+DELETE  /users/{username}/trust/       Seller  Yo no confio en
+
+GET     /users/{username}/trusted/           Admin     Esta persona confia en...
+PUT     /users/{username}/trusted/{username} Admin     1 confia en 2
+DELETE  /users/{username}/trusted/{username} Admin     1 no confia en 2
+
+
+GET     /users/{username}/trust/       Admin   Esta persona confia en...
+GET     /trusted-users/                     Yo confio en...   
+PUT     /trusted-users/                        
+DELETE  /trusted-users/{username}/           
+
+
+
+Product
+GET     /products/
+POST    /products/
+GET     /products/{productid}
+PATCH   /products/{productid}
+DELETE  /products/{productid}
+
+Product Images
+GET     /products/{productid}/images
+POST    /products/{productid}/images
+DELETE  /products/{productid}/images/{image_id}
+
+Cart logged user
+GET     /cart/
+
+Checkout logged user
+PUT     /checkout/
+
+Store
+GET    /users/{username}/store/
+GET    /stores/

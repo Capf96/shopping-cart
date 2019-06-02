@@ -25,7 +25,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
-        AppUser appUser = this.appUserRepo.getByUsername(userName);
+        AppUser appUser = this.appUserRepo.findByUsername(userName);
 
         if (appUser == null) {
             System.out.println("User not found! " + userName);
@@ -34,7 +34,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         System.out.println("Found User: " + appUser);
 
-        List<String> roleNames = this.userRoleRepo.getRoleNameByUserId(appUser.getUserId());
+        List<String> roleNames = this.userRoleRepo.findRoleNameByUserId(appUser.getUserId());
 
         List<GrantedAuthority> grantList = new ArrayList<>();
         if (roleNames != null) {

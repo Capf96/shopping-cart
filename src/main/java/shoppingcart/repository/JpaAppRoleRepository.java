@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import shoppingcart.models.AppRole;
 
 public interface JpaAppRoleRepository extends JpaRepository<AppRole, Long> {
-    AppRole getByRoleName(String roleName);
+    AppRole findByRoleName(String roleName);
 }

@@ -3,7 +3,14 @@ create table APP_USER
   USER_ID           BIGINT not null,
   USERNAME         VARCHAR(36) not null,
   ENCRYPTED_PASSWORD VARCHAR(128) not null,
-  ENABLED           Int not null
+  ENABLED           Int not null,
+  EMAIL            VARCHAR(128) not null,
+  CREATED_AT       date now(),
+  UPDATED_AT       date now(),
+  FIRST_NAME       VARCHAR(128),
+  LAST_NAME        VARCHAR(128),
+  PHONE_NUMBER     VARCHAR(17),
+  MONEY            double
 );
 --
 alter table APP_USER
@@ -43,23 +50,38 @@ alter table USER_ROLE
 
 alter table USER_ROLE
   add constraint USER_ROLE_FK1 foreign key (USER_ID)
-  references APP_USER (USER_ID);
+  references APP_USER (USER_ID) on delete cascade;
 
 alter table USER_ROLE
   add constraint USER_ROLE_FK2 foreign key (ROLE_ID)
-  references APP_ROLE (ROLE_ID);
+  references APP_ROLE (ROLE_ID) on delete cascade;
 
+create table RATINGS
+(
+  RATING_ID BIGINT not null,
+  RATED     BIGINT not null,
+  RATER     BIGINT not null,
+  RATING    Int    not null
+);
 
+alter table RATINGS
+  add constraint RATING_PK primary key (RATING_ID);
+
+alter table RATINGS
+  add constraint RATING_FK1 foreign key (RATED)
+  references APP_USER (USER_ID) on delete cascade;
+
+alter table RATINGS
+  add constraint RATING_FK2 foreign key (RATER)
+  references APP_USER (USER_ID) on delete cascade;
 
 -- Used by Spring Remember Me API.
 CREATE TABLE Persistent_Logins (
-
     username varchar(64) not null,
     series varchar(64) not null,
     token varchar(64) not null,
     last_used timestamp not null,
     PRIMARY KEY (series)
-
 );
 
 ------------------------

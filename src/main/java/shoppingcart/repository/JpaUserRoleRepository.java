@@ -10,9 +10,9 @@ import java.util.List;
 
 public interface JpaUserRoleRepository extends JpaRepository<UserRole, Long> {
     @Query("select ar.roleName from UserRole ur, AppRole ar where ur.appRole = ar.roleId and ar.roleId = ?1")
-    List<String> getRoleNameByUserId(Long appUserId);
+    List<String> findRoleNameByUserId(Long appUserId);
     @Query("select ar from UserRole ur, AppRole ar, AppUser au where ur.appRole = ar.roleId and au.userId = ur.appUser and au.username = ?1")
-    List<AppRole> getRolesByUsername(String username);
+    List<AppRole> findRolesByUsername(String username);
     @Query("select ur from UserRole ur, AppRole ar, AppUser au where au.username = ?1 and ar.roleName = ?2 and ur.appUser = au.userId and ur.appRole = ar.roleId")
-    UserRole getByUsernameAndRoleName(String username, String roleName);
+    UserRole findByUsernameAndRoleName(String username, String roleName);
 }

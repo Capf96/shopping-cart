@@ -8,5 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface JpaAppUserRepository extends JpaRepository<AppUser, Long> {
     List<AppUser> findAll();
-    AppUser getByUsername(String username);
+    AppUser findByUsername(String username);
 }
