@@ -1,4 +1,4 @@
-package shoppingcart.services;
+package shoppingcart.restServices;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -38,11 +38,14 @@ public class UsersRequestsService {
         List<AppUser> allAppUsers = appUserRepo.findAll();
         List<AppUserResponse> responseList = new ArrayList<>();
         for (AppUser user: allAppUsers) {
-            AppUserResponse toAdd = AppUserResponse.builder().userId(user.getUserId())
-                                        .username(user.getUsername()).email(user.getEmail())
-                                        .firstName(user.getFirstName()).lastName(user.getLastName())
-                                        .phoneNumber(user.getPhoneNumber()).money(user.getMoney())
-                                        .build();
+            AppUserResponse toAdd = AppUserResponse.builder()
+                    .userId(user.getUserId())
+                    .username(user.getUsername()).email(user.getEmail())
+                    .firstName(user.getFirstName()).lastName(user.getLastName())
+                    .phoneNumber(user.getPhoneNumber())
+                    .enabled(user.getEnabled())
+                    .money(user.getMoney())
+                    .build();
             responseList.add(toAdd);
         }
         return responseList;
@@ -52,10 +55,15 @@ public class UsersRequestsService {
         AppUser found = appUserRepo.findByUsername(username);
         if (found == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 
-        return AppUserResponse.builder().userId(found.getUserId())
-                    .username(found.getUsername()).email(found.getEmail())
-                    .firstName(found.getFirstName()).lastName(found.getLastName())
-                    .phoneNumber(found.getPhoneNumber()).money(found.getMoney()).build();
+        return AppUserResponse.builder()
+                .userId(found.getUserId())
+                .username(found.getUsername())
+                .email(found.getEmail())
+                .firstName(found.getFirstName())
+                .lastName(found.getLastName())
+                .phoneNumber(found.getPhoneNumber())
+                .enabled(found.getEnabled())
+                .money(found.getMoney()).build();
     }
 
     // POST
@@ -88,6 +96,8 @@ public class UsersRequestsService {
     // PATCH
 
     public AppUserResponse managePatch(String username, Map<Object, Object> values) {
+        // TODO:
+        //  - Create and user dto for patch
         AppUser toModify = appUserRepo.findByUsername(username);
         if (toModify == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 

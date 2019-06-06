@@ -5,12 +5,12 @@ create table APP_USER
   ENCRYPTED_PASSWORD VARCHAR(128) not null,
   ENABLED           Int not null,
   EMAIL            VARCHAR(128) not null,
-  CREATED_AT       date now(),
-  UPDATED_AT       date now(),
+  CREATED_AT       date default now(),
+  UPDATED_AT       date default now(),
   FIRST_NAME       VARCHAR(128),
   LAST_NAME        VARCHAR(128),
   PHONE_NUMBER     VARCHAR(17),
-  MONEY            double
+  MONEY            double precision
 );
 --
 alter table APP_USER
@@ -74,6 +74,45 @@ alter table RATINGS
 alter table RATINGS
   add constraint RATING_FK2 foreign key (RATER)
   references APP_USER (USER_ID) on delete cascade;
+
+create table PRODUCTS
+(
+  PRODUCT_ID    BIGINT,
+  NAME          VARCHAR(64) not null,
+  DESCRIPTION   TEXT,
+  SELLER        BIGINT,
+  PRICE         DOUBLE PRECISION,
+  VISIBILITY    BOOLEAN,
+  QUANTITY      INTEGER
+);
+
+alter table PRODUCTS
+  add constraint PRODUCTS_PK primary key (PRODUCT_ID);
+
+alter table PRODUCTS
+  add constraint PRODUCTS_FK1 foreign key (SELLER)
+  references APP_USER (USER_ID) on delete cascade;
+
+create table TRUST
+(
+  TRUST_ID    BIGINT,
+  TRUSTER     BIGINT,
+  TRUSTEE     BIGINT
+);
+
+alter table TRUST
+    add constraint TRUST_PK primary key (TRUST_ID);
+
+alter table TRUST
+    add constraint  TRUST_FK1 foreign key (TRUSTER)
+    references APP_USER (USER_ID) on delete cascade;
+
+alter table TRUST
+    add constraint  TRUST_FK2 foreign key (TRUSTEE)
+    references APP_USER (USER_ID) on delete cascade;
+
+alter table TRUST
+    add constraint TRUST_UK unique (TRUSTER, TRUSTEE);
 
 -- Used by Spring Remember Me API.
 CREATE TABLE Persistent_Logins (

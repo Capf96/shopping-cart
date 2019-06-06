@@ -1,23 +1,19 @@
 package shoppingcart.requests;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotNull;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RatingsScoreRequest {
+public class TrustRequest {
     @NotNull
-    @Min(value = 1)
-    @Max(value = 5)
-    private Integer rating;
+    private String trustee;
 
     private String dummy;
 }

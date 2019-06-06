@@ -1,7 +1,5 @@
 package shoppingcart.rest;
 
-import java.lang.reflect.Field;
-import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -11,9 +9,6 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -35,11 +30,11 @@ import io.swagger.annotations.ApiResponses;
 
 import shoppingcart.requests.AppUserRequest;
 import shoppingcart.responses.AppUserResponse;
-import shoppingcart.services.UsersRequestsService;
+import shoppingcart.restServices.UsersRequestsService;
 
 @Api(value="Users Management System", description="Operations pertaining to users in Shopping Cart API")
 @RestController
-@RequestMapping("/users/")
+@RequestMapping("/api/users/")
 public class UsersController {
     @Autowired
     UsersRequestsService usersRequestsService;

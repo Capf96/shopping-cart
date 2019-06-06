@@ -11,13 +11,13 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class RatingsRequest {
+@AllArgsConstructor
+public class RatingsPatchRequest {
     @NotNull
-    private String rater;
-    @NotNull
-    @Max(value = 5, message = "Ratings must be lesser or equal to 5")
-    @Min(value = 1, message = "Ratings must be greater or equal to 1")
+    @Min(value = 1)
+    @Max(value = 5)
     private Integer rating;
+
+    private String dummy;
 }

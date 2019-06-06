@@ -12,5 +12,6 @@ public class AppUserResponse {
     private String firstName;
     private String lastName;
     private String phoneNumber;
+    private Integer enabled;
     private double money;
 }

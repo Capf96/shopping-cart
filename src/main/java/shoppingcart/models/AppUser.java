@@ -16,9 +16,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 @Data
 @Builder
-@Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity
 @Table(name = "app_user",
         uniqueConstraints = {
         @UniqueConstraint(name = "APP_USER_UK", columnNames = "Username") })
@@ -59,5 +59,5 @@ public class AppUser {
     private String phoneNumber;
 
     @Column(name = "money")
-    private double money;
+    private Double money;
 }

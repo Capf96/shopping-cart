@@ -4,31 +4,30 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.persistence.*;
-
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import javax.persistence.*;
+
 @Data
-@Entity
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "user_role")
-public class UserRole {
+@AllArgsConstructor
+@Entity
+@Table(name = "trust")
+public class Trust {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(name = "id", nullable = false)
-    private Long userRoleId;
+    @Column(name = "trust_id", nullable = false)
+    private Long trustId;
 
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "user_id", nullable = false)
-    private AppUser appUser;
+    @JoinColumn(name = "truster", nullable = false)
+    private AppUser truster;
 
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "role_id", nullable = false)
-    private AppRole appRole;
+    @JoinColumn(name = "trustee", nullable = false)
+    private AppUser trustee;
 }

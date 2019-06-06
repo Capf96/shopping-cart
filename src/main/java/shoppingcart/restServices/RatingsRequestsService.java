@@ -1,4 +1,4 @@
-package shoppingcart.services;
+package shoppingcart.restServices;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,7 @@ import shoppingcart.models.Ratings;
 import shoppingcart.repository.JpaAppUserRepository;
 import shoppingcart.repository.JpaRatingsRepository;
 import shoppingcart.requests.RatingsRequest;
-import shoppingcart.requests.RatingsScoreRequest;
+import shoppingcart.requests.RatingsPatchRequest;
 import shoppingcart.responses.RatingsResponse;
 
 @Service
@@ -24,6 +24,8 @@ public class RatingsRequestsService {
 
     @Autowired
     JpaAppUserRepository appUserRepo;
+
+    // GET
 
     public List<RatingsResponse> manageGet(String username) {
         AppUser user = appUserRepo.findByUsername(username);
@@ -42,7 +44,11 @@ public class RatingsRequestsService {
         return responseList;
     }
 
+    // PUT
+
     public RatingsResponse managePut(String username, RatingsRequest rating) {
+        // TODO:
+        //  - Fix the response when the request is badly formed
         AppUser rated = appUserRepo.findByUsername(username);
         if (rated == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Rated user not found");
 
@@ -60,7 +66,9 @@ public class RatingsRequestsService {
                     .rating(saved.getRating()).build();
     }
 
-    public RatingsResponse managePatch(String username, Long ratingId, RatingsScoreRequest patch) {
+    // PATCH
+
+    public RatingsResponse managePatch(String username, Long ratingId, RatingsPatchRequest patch) {
         AppUser user = appUserRepo.findByUsername(username);
         if (user == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 
@@ -76,6 +84,8 @@ public class RatingsRequestsService {
                     .rated(saved.getRated().getUsername())
                     .rating(saved.getRating()).build();
     }
+
+    // DELETE
 
     public ResponseEntity <HttpStatus> manageDelete(String username, Long ratingId) {
         AppUser user = appUserRepo.findByUsername(username);

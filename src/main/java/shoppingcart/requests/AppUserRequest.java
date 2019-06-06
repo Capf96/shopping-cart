@@ -24,6 +24,8 @@ public class AppUserRequest {
     private String lastName;
 
     private String phoneNumber;
+
+    private Integer enabled;
     
     private double money;
 }

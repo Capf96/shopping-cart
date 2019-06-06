@@ -1,4 +1,4 @@
-package shoppingcart.services;
+package shoppingcart.restServices;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import shoppingcart.models.AppRole;
 import shoppingcart.models.AppUser;
 import shoppingcart.repository.JpaAppUserRepository;
 import shoppingcart.repository.JpaUserRoleRepository;
@@ -34,12 +35,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         System.out.println("Found User: " + appUser);
 
-        List<String> roleNames = this.userRoleRepo.findRoleNameByUserId(appUser.getUserId());
+        List<AppRole> roleNames = this.userRoleRepo.findRolesByUsername(appUser.getUsername());
 
         List<GrantedAuthority> grantList = new ArrayList<>();
         if (roleNames != null) {
-            for (String role : roleNames) {
-                GrantedAuthority authority = new SimpleGrantedAuthority(role);
+            System.out.println(roleNames);
+            for (AppRole role : roleNames) {
+                GrantedAuthority authority = new SimpleGrantedAuthority(role.getRoleName());
                 grantList.add(authority);
             }
         }

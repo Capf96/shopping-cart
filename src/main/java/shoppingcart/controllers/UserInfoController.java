@@ -19,7 +19,7 @@ public class UserInfoController {
         // After user login successfully.
         String userName = principal.getName();
 
-        System.out.println("User Name: " + userName);
+        System.out.println(principal);
 
         User loggedUser = (User) ((Authentication) principal).getPrincipal();
 
