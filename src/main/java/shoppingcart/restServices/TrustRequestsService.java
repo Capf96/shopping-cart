@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import shoppingcart.models.AppUser;
 import shoppingcart.models.Trust;
+import shoppingcart.models.TrustIdentity;
 import shoppingcart.repository.JpaAppUserRepository;
 import shoppingcart.repository.JpaTrustRepository;
 import shoppingcart.requests.TrustRequest;
@@ -32,13 +33,12 @@ public class TrustRequestsService {
         AppUser user = appUserRepo.findByUsername(username);
         if (user == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 
-        List<Trust> trustedList = trustRepo.findByTrusterUsername(username);
+        List<Trust> trustedList = trustRepo.findByTrust_Truster_Username(username);
         List<TrustResponse> responseList = new ArrayList<>();
         for (Trust trust: trustedList) {
             TrustResponse toAdd = TrustResponse.builder()
-                    .trustId(trust.getTrustId())
-                    .truster(trust.getTruster().getUsername())
-                    .trustee(trust.getTrustee().getUsername())
+                    .truster(trust.getTrust().getTruster().getUsername())
+                    .trustee(trust.getTrust().getTrustee().getUsername())
                     .build();
             responseList.add(toAdd);
         }
@@ -64,20 +64,20 @@ public class TrustRequestsService {
         AppUser trustee = appUserRepo.findByUsername(trustRequest.getTrustee());
         if (trustee == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 
-        Trust exists = trustRepo.findByTrusterAndTrustee(truster, trustee);
+        TrustIdentity trustIdentity = TrustIdentity.builder().truster(truster).trustee(trustee).build();
+
+        Trust exists = trustRepo.findByTrust(trustIdentity);
         if (exists != null) throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED, "Trust already in database");
 
         Trust newTrust = Trust.builder()
-                .truster(truster)
-                .trustee(trustee)
+                .trust(trustIdentity)
                 .build();
 
         Trust saved = trustRepo.save(newTrust);
 
         return TrustResponse.builder()
-                .trustId(saved.getTrustId())
-                .truster(saved.getTruster().getUsername())
-                .trustee(saved.getTrustee().getUsername())
+                .truster(saved.getTrust().getTruster().getUsername())
+                .trustee(saved.getTrust().getTrustee().getUsername())
                 .build();
     }
 
@@ -90,10 +90,11 @@ public class TrustRequestsService {
         AppUser truster = appUserRepo.findByUsername(user.getUsername());
         if (truster == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 
-        AppUser trusted = appUserRepo.findByUsername(trustedUsername);
-        if (trusted == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        AppUser trustee = appUserRepo.findByUsername(trustedUsername);
+        if (trustee == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 
-        Trust toDelete = trustRepo.findByTrusterAndTrustee(truster, trusted);
+        Trust toDelete = trustRepo.findByTrust(TrustIdentity.builder().truster(truster).trustee(trustee).build());
+        if (toDelete == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Trust not found");
 
         trustRepo.delete(toDelete);
 

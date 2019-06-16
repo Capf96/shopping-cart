@@ -10,12 +10,15 @@ import org.hibernate.annotations.OnDeleteAction;
 import javax.persistence.*;
 
 @Data
+@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "trust")
-public class Trust {
+@Table(name = "cart")
+public class Cart {
     @EmbeddedId
-    private TrustIdentity trust;
+    private CartIdentity cartId;
+
+    @Column(name = "quantity", nullable = false)
+    private Integer quantity;
 }

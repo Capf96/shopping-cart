@@ -7,9 +7,6 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
 @Data
 @Entity
 @Builder
@@ -17,18 +14,6 @@ import org.hibernate.annotations.OnDeleteAction;
 @NoArgsConstructor
 @Table(name = "user_role")
 public class UserRole {
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(name = "id", nullable = false)
-    private Long userRoleId;
-
-    @ManyToOne
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "user_id", nullable = false)
-    private AppUser appUser;
-
-    @ManyToOne
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "role_id", nullable = false)
-    private AppRole appRole;
+    @EmbeddedId
+    private UserRoleIdentity userRole;
 }

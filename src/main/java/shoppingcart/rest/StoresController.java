@@ -1,10 +1,12 @@
 package shoppingcart.rest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import shoppingcart.models.Cart;
+import shoppingcart.models.CartIdentity;
+import shoppingcart.repository.JpaAppUserRepository;
+import shoppingcart.repository.JpaCartRepository;
+import shoppingcart.repository.JpaProductsRepository;
 import shoppingcart.responses.StoreResponse;
 import shoppingcart.restServices.StoresRequestsService;
 
@@ -15,6 +17,15 @@ import java.util.List;
 public class StoresController {
     @Autowired
     StoresRequestsService storesRequestsService;
+
+    @Autowired
+    JpaCartRepository cartRepo;
+
+    @Autowired
+    JpaAppUserRepository userRepo;
+
+    @Autowired
+    JpaProductsRepository productsRepo;
 
     @GetMapping("/api/stores/")
     public List<StoreResponse> getStores() {

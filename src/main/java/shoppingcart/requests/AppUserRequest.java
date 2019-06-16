@@ -2,15 +2,16 @@ package shoppingcart.requests;
 
 import javax.validation.constraints.NotNull;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class AppUserRequest {
-    // TODO:
-    // Falta ponerle los tamaños maximos a cada una de los campos para evitar esos errores a la hora de insertar en base 
-    // de datos
     @NotNull(message = "The username is a required field")
     private String username;
 
@@ -27,5 +28,5 @@ public class AppUserRequest {
 
     private Integer enabled;
     
-    private double money;
+    private Double money;
 }

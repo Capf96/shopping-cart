@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class UserRoleResponse {
-    private String username;
-    private Long appRoleId;
+public class CartResponse {
+    private Long productId;
+    private Integer quantity;
 }

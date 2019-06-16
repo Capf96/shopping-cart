@@ -19,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import shoppingcart.models.AppUser;
 import shoppingcart.repository.JpaAppUserRepository;
+import shoppingcart.requests.AppUserPatchRequest;
 import shoppingcart.requests.AppUserRequest;
 import shoppingcart.responses.AppUserResponse;
 import shoppingcart.services.EncryptedPasswordsUtils;;
@@ -39,9 +40,10 @@ public class UsersRequestsService {
         List<AppUserResponse> responseList = new ArrayList<>();
         for (AppUser user: allAppUsers) {
             AppUserResponse toAdd = AppUserResponse.builder()
-                    .userId(user.getUserId())
-                    .username(user.getUsername()).email(user.getEmail())
-                    .firstName(user.getFirstName()).lastName(user.getLastName())
+                    .username(user.getUsername())
+                    .email(user.getEmail())
+                    .firstName(user.getFirstName())
+                    .lastName(user.getLastName())
                     .phoneNumber(user.getPhoneNumber())
                     .enabled(user.getEnabled())
                     .money(user.getMoney())
@@ -56,7 +58,6 @@ public class UsersRequestsService {
         if (found == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 
         return AppUserResponse.builder()
-                .userId(found.getUserId())
                 .username(found.getUsername())
                 .email(found.getEmail())
                 .firstName(found.getFirstName())
@@ -78,7 +79,7 @@ public class UsersRequestsService {
                             .phoneNumber(user.getPhoneNumber()).money(user.getMoney()).build();
         AppUser inserted = appUserRepo.save(newUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                AppUserResponse.builder().userId(inserted.getUserId()).username(inserted.getUsername())
+                AppUserResponse.builder().username(inserted.getUsername())
                 .email(inserted.getEmail()).firstName(inserted.getFirstName()).lastName(inserted.getLastName())
                 .phoneNumber(inserted.getPhoneNumber()).money(inserted.getMoney()).build());
     }
@@ -95,23 +96,28 @@ public class UsersRequestsService {
 
     // PATCH
 
-    public AppUserResponse managePatch(String username, Map<Object, Object> values) {
-        // TODO:
-        //  - Create and user dto for patch
+    public AppUserResponse managePatch(String username, AppUserPatchRequest patch) {
         AppUser toModify = appUserRepo.findByUsername(username);
         if (toModify == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 
-        values.forEach((k, v) -> {
-            Field field = ReflectionUtils.findField(AppUser.class, (String) k);
-            if (field != null) {
-                field.setAccessible(true);
-                ReflectionUtils.setField(field, toModify, v);
-            }
-        });
-        appUserRepo.save(toModify);
+        AppUser modified = AppUser.builder()
+                .username(toModify.getUsername())
+                .encryptedPassword(toModify.getEncryptedPassword())
+                .email((patch.getEmail() != null)? patch.getEmail(): toModify.getEmail())
+                .firstName((patch.getFirstName() != null)? patch.getFirstName(): toModify.getFirstName())
+                .lastName((patch.getLastName() != null)? patch.getLastName(): toModify.getLastName())
+                .phoneNumber((patch.getPhoneNumber() != null)? patch.getPhoneNumber(): toModify.getPhoneNumber())
+                .money((patch.getMoney() != null)? patch.getMoney(): toModify.getMoney())
+                .build();
+        AppUser saved = appUserRepo.save(modified);
 
-        return AppUserResponse.builder().userId(toModify.getUserId()).username(toModify.getUsername())
-                .email(toModify.getEmail()).firstName(toModify.getFirstName()).lastName(toModify.getLastName())
-                .phoneNumber(toModify.getPhoneNumber()).money(toModify.getMoney()).build();
+        return AppUserResponse.builder()
+                .username(saved.getUsername())
+                .email(saved.getEmail())
+                .firstName(saved.getFirstName())
+                .lastName(saved.getLastName())
+                .phoneNumber(saved.getPhoneNumber())
+                .money(saved.getMoney())
+                .build();
     }
 }

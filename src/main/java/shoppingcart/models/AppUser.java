@@ -24,10 +24,6 @@ import org.hibernate.annotations.UpdateTimestamp;
         @UniqueConstraint(name = "APP_USER_UK", columnNames = "Username") })
 public class AppUser {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
-
     @Column(name = "username", length = 50, nullable = false, unique = true)
     private String username;
 

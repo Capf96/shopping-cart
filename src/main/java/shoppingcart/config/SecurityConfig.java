@@ -49,7 +49,11 @@ public class SecurityConfig {
                     .and()
                     .authorizeRequests()
                     .antMatchers("/api/trusted-users/")
-                    .access("hasRole('ROLE_SELLER')");
+                    .access("hasRole('ROLE_SELLER')")
+                    .and()
+                    .authorizeRequests()
+                    .antMatchers("/api/cart/**", "/api/checkout/")
+                    .access("hasRole('ROLE_BUYER')");
 
         }
     }
@@ -98,7 +102,7 @@ public class SecurityConfig {
                     // Submit URL of login page.
                     .loginProcessingUrl("/j_spring_security_check") // Submit URL
                     .loginPage("/login")
-                    .defaultSuccessUrl("/userAccountInfo")
+                    .defaultSuccessUrl("/userInfo")
                     .failureUrl("/login?error=true")
                     .usernameParameter("username")
                     .passwordParameter("password")

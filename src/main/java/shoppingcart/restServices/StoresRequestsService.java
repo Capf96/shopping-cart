@@ -9,12 +9,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import shoppingcart.models.AppUser;
 import shoppingcart.models.Products;
+import shoppingcart.models.TrustIdentity;
 import shoppingcart.models.UserRole;
 import shoppingcart.repository.JpaAppUserRepository;
 import shoppingcart.repository.JpaProductsRepository;
 import shoppingcart.repository.JpaTrustRepository;
 import shoppingcart.repository.JpaUserRoleRepository;
-import shoppingcart.responses.ProductsResponse;
 import shoppingcart.responses.ProductsStoreResponse;
 import shoppingcart.responses.StoreResponse;
 
@@ -51,7 +51,8 @@ public class StoresRequestsService {
             List<ProductsStoreResponse> store = new ArrayList<>();
             boolean add = false;
             if (checkVisible) {
-                add = trustRepo.findByTrusterAndTrustee(seller, user) != null || user.getUsername().equals(seller.getUsername());
+                add = trustRepo.findByTrust(TrustIdentity.builder().truster(seller).trustee(user).build()) != null ||
+                        user.getUsername().equals(seller.getUsername());
             }
             for (Products product: sellerProducts) {
                 if (add || product.getVisible()) {
@@ -93,14 +94,16 @@ public class StoresRequestsService {
         if (seller == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 
         // TODO: Verificar si el precondition failed es correcto
-        UserRole isSeller = userRoleRepo.findByUsernameAndRoleName(username, "ROLE_SELLER");
+        UserRole isSeller = userRoleRepo
+                .findByUserRole_AppUser_UsernameAndUserRole_AppRole_RoleName(username, "ROLE_SELLER");
         if (isSeller == null) throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED, "User is not seller");
 
         List<Products> sellerProducts = productsRepo.findBySeller(seller);
         List<ProductsStoreResponse> store = new ArrayList<>();
         boolean add = false;
         if (checkVisible) {
-            add = trustRepo.findByTrusterAndTrustee(seller, user) != null || user.getUsername().equals(seller.getUsername());
+            add = trustRepo.findByTrust(TrustIdentity.builder().truster(seller).trustee(user).build()) != null ||
+                    user.getUsername().equals(seller.getUsername());
         }
         for (Products product: sellerProducts) {
             if (add || product.getVisible()) {

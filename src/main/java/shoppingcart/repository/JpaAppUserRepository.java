@@ -7,9 +7,9 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface JpaAppUserRepository extends JpaRepository<AppUser, Long> {
-    List<AppUser> findAll();
+public interface JpaAppUserRepository extends JpaRepository<AppUser, String> {
     AppUser findByUsername(String username);
-    @Query("select au from AppUser au, UserRole ur where ur.appUser = au.userId and ur.appRole.roleName = ?1")
+    List<AppUser> findAll();
+    @Query("select au from AppUser au, UserRole ur where ur.userRole.appUser.username = au.username and ur.userRole.appRole.roleName = ?1")
     List<AppUser> findByRoleName(String RoleName);
 }

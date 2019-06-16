@@ -16,8 +16,6 @@ PUT    /users/{username}/ratings/
 PATCH  /users/{username}/ratings/{ratingid}/
 DELETE /users/{username}/ratings/{ratingid}/
 
-Product
-// TODO: retornar la cantidad en carrito a los usuarios para que puedan hacer patch a los mismos tambien
 GET     /products/
 POST    /products/
 GET     /products/{productid}/
@@ -34,15 +32,16 @@ Store
 GET    /users/{username}/store/
 GET    /stores/
 
--------------------------Done from here up-------------------------
+Cart logged user
+GET     /cart/
+PUT     /cart/
+PATCH   /cart/{productId}/        Cambia la cantidad del producto en carrito
+DELETE  /cart/{productId}/        Elimina el producto del carrito
+PUT     /checkout/                Compra los productos del carrito
 
 Product Images
 GET     /products/{productid}/images
 POST    /products/{productid}/images
 DELETE  /products/{productid}/images/{image_id}
 
-Cart logged user
-GET     /cart/
-
-Checkout logged user
-PUT     /checkout/
+-------------------------Done from here up-------------------------

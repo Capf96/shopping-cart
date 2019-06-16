@@ -18,14 +18,12 @@ import shoppingcart.requests.ProductsPatchRequest;
 import shoppingcart.requests.ProductsRequest;
 import shoppingcart.responses.ProductsResponse;
 
+import javax.validation.constraints.Null;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class ProductsRequestsService {
-    // TODO:
-    //  - Add onCart field to the response
-
     @Autowired
     JpaProductsRepository productsRepo;
 
@@ -79,7 +77,8 @@ public class ProductsRequestsService {
         if (authentication.getPrincipal() == "anonymousUser") throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 
         User user = (User) authentication.getPrincipal();
-        UserRole isSeller = userRoleRepo.findByUsernameAndRoleName(user.getUsername(), "ROLE_SELLER");
+        UserRole isSeller = userRoleRepo
+                .findByUserRole_AppUser_UsernameAndUserRole_AppRole_RoleName(user.getUsername(), "ROLE_SELLER");
 
         if (isSeller == null) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 
@@ -151,7 +150,8 @@ public class ProductsRequestsService {
         Products toDelete = productsRepo.findByProductId(productId);
         if (toDelete == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
 
-        UserRole isAdmin = userRoleRepo.findByUsernameAndRoleName(user.getUsername(), "ROLE_ADMIN");
+        UserRole isAdmin = userRoleRepo
+                .findByUserRole_AppUser_UsernameAndUserRole_AppRole_RoleName(user.getUsername(), "ROLE_ADMIN");
         if (isAdmin == null || !user.getUsername().equals(toDelete.getSeller().getUsername()))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 
