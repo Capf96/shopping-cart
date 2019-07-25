@@ -38,8 +38,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         List<UserRole> roleNames = this.userRoleRepo.findByUserRole_AppUser_Username(appUser.getUsername());
 
-        System.out.println("Llega aqui");
-
         List<GrantedAuthority> grantList = new ArrayList<>();
         if (roleNames != null) {
             System.out.println(roleNames);

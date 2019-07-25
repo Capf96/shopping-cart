@@ -9,7 +9,7 @@ create table APP_USER
   FIRST_NAME         VARCHAR(128),
   LAST_NAME          VARCHAR(128),
   PHONE_NUMBER       VARCHAR(17),
-  MONEY              double precision
+  MONEY              double precision not null
 );
 --
 alter table APP_USER

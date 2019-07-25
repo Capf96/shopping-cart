@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -12,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import shoppingcart.services.UserDetailsServiceImpl;
 
 import javax.sql.DataSource;
@@ -33,15 +35,20 @@ public class SecurityConfig {
                     .authenticationEntryPoint(new Http403ForbiddenEntryPoint())
                     .and()
                     .authorizeRequests()
-                    .antMatchers("/api/users/", "/api/users/{username}/roles/**", "/api/users/{username}/trust/")
-                    .access("hasRole('ROLE_ADMIN')")
+                    .antMatchers("/api/users/{username}/roles/**", "/api/users/{username}/trust/")
+                    .access("hasRole('ROLE_ADMIN') or @userSecurity.hasUsername(authentication, #username)")
+//                    .and()
+//                    .authorizeRequests()
+//                    .antMatchers("/api/users/{username}/")
+//                    .access("hasRole('ROLE_ADMIN') or @userSecurity.hasUsername(authentication, #username)")
                     .and()
                     .authorizeRequests()
-                    .antMatchers("/api/users/{username}/")
-                    .access("hasRole('ROLE_ADMIN') or @userSecurity.hasUsername(authentication, #username)").and()
+                    .antMatchers(HttpMethod.GET, "/api/users/{username}/ratings/")
+                    .permitAll()
+                    .and()
                     .authorizeRequests()
-                    .antMatchers("/api/users/{username}/ratings/")
-                    .access("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER', 'ROLE_ADMIN')")
+                    .antMatchers(HttpMethod.PUT, "/api/users/{username}/ratings/")
+                    .access("hasRole('ROLE_BUYER')")
                     .and()
                     .authorizeRequests()
                     .antMatchers("/api/users/{username}/ratings/{ratingId}/")
@@ -90,7 +97,7 @@ public class SecurityConfig {
                     .and()
                     .authorizeRequests()
                     .antMatchers("/userInfo")
-                    .access("hasAnyRole('ROLE_BUYER', 'ROLE_SELLER', 'ROLE_ADMIN')")
+                    .access("isAuthenticated()")
                     .and()
                     .authorizeRequests()
                     .antMatchers("/admin")
@@ -102,7 +109,7 @@ public class SecurityConfig {
                     // Submit URL of login page.
                     .loginProcessingUrl("/j_spring_security_check") // Submit URL
                     .loginPage("/login")
-                    .defaultSuccessUrl("/userInfo")
+                    .defaultSuccessUrl("/")
                     .failureUrl("/login?error=true")
                     .usernameParameter("username")
                     .passwordParameter("password")

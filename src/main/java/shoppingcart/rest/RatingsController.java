@@ -19,70 +19,75 @@ import org.springframework.web.bind.annotation.*;
 import shoppingcart.requests.RatingsRequest;
 import shoppingcart.requests.RatingsPatchRequest;
 import shoppingcart.responses.RatingsResponse;
+import shoppingcart.responses.SingleRatingResponse;
 import shoppingcart.restServices.RatingsRequestsService;
 
-@Api(value="Ratings Management System", description="Operations pertaining to roles of users in Shopping Cart API")
+@Api(description="Operations pertaining to roles of users in Shopping Cart API", tags = "Ratings")
 @RestController
-@RequestMapping("/api/users/{username}/ratings/")
+@RequestMapping("/api/")
 public class RatingsController {
     @Autowired
     RatingsRequestsService ratingsRequestsService;
 
     // GET
 
-    @ApiOperation(value = "View a list of ratings given to an specific user", response = List.class)
+    @ApiOperation(value = "View a list of ratings given to an specific user", response = RatingsResponse.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successfully retrieved list"),
             @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
             @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
             @ApiResponse(code = 404, message = "The resource you were trying to reach was not found")
     })
-    @GetMapping
-    public List<RatingsResponse> getRatings(@PathVariable String username) {
+    @GetMapping("/users/{username}/ratings/")
+    public RatingsResponse getRatings(@PathVariable String username) {
         return ratingsRequestsService.manageGet(username);
     }
 
     // PUT
 
-    @ApiOperation(value = "Add a rating to an user", response = RatingsResponse.class)
+    @ApiOperation(value = "Add a rating to an user", response = SingleRatingResponse.class)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successfully added rating"),
+            @ApiResponse(code = 201, message = "Successfully added rating"),
             @ApiResponse(code = 400, message = "The request was badly formed"),
             @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
             @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach was not found")
+            @ApiResponse(code = 404, message = "The resource you were trying to reach was not found"),
+            @ApiResponse(code = 412, message = "The user you were trying to rate is not a seller")
     })
-    @PutMapping
-    public RatingsResponse putRatings(@PathVariable String username, @Valid @RequestBody RatingsRequest rating) {
+    @PutMapping("/users/{username}/ratings/")
+    public SingleRatingResponse putRatings(@PathVariable String username, @Valid @RequestBody RatingsRequest rating) {
         return ratingsRequestsService.managePut(username, rating);
     }
 
     // PATCH
 
-    @ApiOperation(value = "Update an specific rating given to an specific user", response = RatingsResponse.class)
+    @ApiOperation(value = "Update a rating given to an user", response = SingleRatingResponse.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successfully updated rating"),
             @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
             @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach was not found")
+            @ApiResponse(code = 404, message = "The resource you were trying to reach was not found"),
+            @ApiResponse(code = 412, message = "Not resource owner or rating yourself")
     })
-    @PatchMapping("/{ratingId}/")
-    public RatingsResponse patchRatings(@PathVariable String username, @PathVariable Long ratingId, @Valid @RequestBody RatingsPatchRequest patch) {
-        return ratingsRequestsService.managePatch(username, ratingId, patch);
+    @PatchMapping("/ratings/{ratingId}/")
+    public SingleRatingResponse patchRatings(@PathVariable Long ratingId, @Valid @RequestBody RatingsPatchRequest patch) {
+        return ratingsRequestsService.managePatch(ratingId, patch);
     }
 
     // DELETE
 
-    @ApiOperation(value = "Delete an specific rating given to an specific user", response = ResponseEntity.class)
+    @ApiOperation(value = "Delete a rating given to an user")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successfully deleted rating"),
             @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
             @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach was not found")
+            @ApiResponse(code = 404, message = "The resource you were trying to reach was not found"),
+            @ApiResponse(code = 412, message = "Not resource owner")
     })
-    @DeleteMapping("/{ratingId}/")
-    public ResponseEntity <HttpStatus> deleteRatings(@PathVariable String username, @PathVariable Long ratingId) {
-        return ratingsRequestsService.manageDelete(username, ratingId);
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/ratings/{ratingId}/")
+    public void deleteRatings(@PathVariable Long ratingId) {
+        ratingsRequestsService.manageDelete(ratingId);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

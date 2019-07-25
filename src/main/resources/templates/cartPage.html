@@ -1,0 +1,60 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:include="/_head"></th:block>
+
+<body>
+
+<!-- Include _menu.html -->
+<th:block th:include="/_menu"></th:block>
+
+<h2 class="text-center" style="padding-top: 20px">My Cart</h2>
+
+<div class="flex-container" style="flex-direction: column">
+    <form th:action="@{/cart/update}" method="POST">
+        <div th:each="product : ${inCart}" class="invisible-barrier">
+            <div class="text-center flex-container">
+                <div style="width: 20%" th:if="${!product.getImages().isEmpty()}">
+                    <img width="200" height="auto" th:src="${product.getImages()[0].getPath()}">
+                </div>
+                <div style="width: 20%" th:if="${product.getImages().isEmpty()}">
+                    <img width="200" height="auto" th:src="${'/images/NoImage.png'}">
+                </div>
+                <div style="width: 60%; text-align: left; flex-direction: column" class="flex-container">
+                    <a th:href="@{${'/stores/' + product.getSeller() + '/' + product.getProductId()}}">
+                        <span th:text="${product.getName()}"> Name </span>
+                    </a>
+                    <span th:text="${product.getDescription()}"></span>
+                    <p>Price: <span th:text="${product.getPrice()}"></span>$</p>
+                </div>
+                <div style="width: 20%; text-align: left; flex-direction: column" class="flex-container">
+                    <p>
+                        Quantity in Cart:
+                        <div style="padding-bottom: 10px">
+                            <input type="number" name="ids" th:value="${product.getProductId()}" hidden>
+                            <input type="number" name="quantities" th:value="${product.getQuantity()}">
+                        </div>
+                    </p>
+                    <a th:href="${'/cart/' + product.getProductId() + '/remove'}" class="btn btn-danger">
+                        Remove
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: center;width: 100%" th:if="${!inCart.isEmpty()}">
+            <input class="btn-primary" type="submit" value="Save Changes"/>
+        </div>
+    </form>
+    <div style="display: flex; align-items: center; justify-content: center;width: 100%; padding-top: 20px" th:if="${!inCart.isEmpty()}">
+        <form th:action="@{/cart/checkout}" method="POST">
+            <input class="btn-info" type="submit" value="Checkout"/>
+        </form>
+    </div>
+
+    <div style="display: flex; align-items: center; justify-content: center;width: 100%; padding-top: 20px" th:if="${inCart.isEmpty()}">
+        Your cart is empty :c
+    </div>
+</div>
+
+</body>
+</html>

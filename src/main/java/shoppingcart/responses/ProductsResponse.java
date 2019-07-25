@@ -1,5 +1,6 @@
 package shoppingcart.responses;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,6 +22,7 @@ public class ProductsResponse {
 
     private Double price;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean visible;
 
     private Integer quantity;

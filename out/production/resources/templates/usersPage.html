@@ -1,0 +1,24 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:include="/_head"></th:block>
+
+<body>
+
+<!-- Include _menu.html -->
+<th:block th:include="/_menu"></th:block>
+
+<h2>Products in store</h2>
+
+<div class="flex-container">
+    <div th:each="user : ${users}" class="invisible-barrier">
+        <div class="text-center">
+            <a th:href="${'users/' + user.getUsername()}">
+                <span th:text="${user.getUsername()}"> Name </span>
+            </a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

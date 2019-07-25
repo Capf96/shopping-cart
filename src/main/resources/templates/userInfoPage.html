@@ -1,20 +1,46 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>User Info</title>
-</head>
+
+<th:block th:include="/_head"></th:block>
+
 <body>
 <!-- Include _menu.html -->
 <th:block th:include="/_menu"></th:block>
 
+<div style="padding-left: 40px; padding-top: 40px">
 
-<h2>User Info Page</h2>
-<h3>Welcome : <span th:utext="${#request.userPrincipal.name}"></span></h3>
-<b>This is protected page!</b>
+    <h2>User Info Page</h2>
+    <h3>Welcome : <span th:utext="${user.getUsername()}"></span></h3>
 
-<br/><br/>
+    <br/><br/>
 
-<div th:if="${userInfo != null}" th:utext="${userInfo}"></div>
+    <div>
+        <h4>Name: <span th:utext="${user.getFirstName() + ' ' + user.getLastName()}"></span></h4>
+        <h4>Email: <span th:utext="${user.getEmail()}"></span></h4>
+        <h4>Money: <span th:utext="${user.getMoney()}"></span></h4>
+    </div>
+
+    <div sec:authorize="!hasRole('ROLE_ADMIN')">
+        <ul>
+            <li th:each="role: ${roles.getRoles()}" th:text="${role}"></li>
+        </ul>
+    </div>
+
+    <div sec:authorize="hasRole('ROLE_ADMIN')">
+        <form th:action="@{/userInfo/updateRoles}" method="POST">
+            <input hidden="hidden" th:value="${roles.getUsername()}" name="username" />
+            <input type="checkbox" th:checked="${roles.getRoles().contains('ROLE_BUYER')}" name="buyer"> Buyer<br>
+            <input type="checkbox" th:checked="${roles.getRoles().contains('ROLE_SELLER')}" name="seller"> Seller<br>
+            <input type="checkbox" th:checked="${roles.getRoles().contains('ROLE_ADMIN')}" name="admin"> Admin<br>
+            <input name="submit" type="submit" value="Update Roles" class="btn-primary"/>
+        </form>
+    </div>
+
+    <a th:href="@{${'/updateInfo'}}" class="btn btn-info">
+        Update Info
+    </a>
+
+</div>
 
 </body>
 

@@ -45,3 +45,52 @@ POST    /products/{productid}/images
 DELETE  /products/{productid}/images/{image_id}
 
 -------------------------Done from here up-------------------------
+
+
+
+
+
+
+
+
+GET     /products/{productid}/images
+GET     /products/
+GET     /products/{productid}/
+GET    /stores/
+GET    /users/{username}/
+POST   /users/
+PUT    /users/{username}/roles/
+DELETE /users/{username}/roles/{rolename}/
+GET    /users/{username}/store/
+GET    /users/{username}/roles/
+GET    /users/
+GET     /trusted-users/                     Yo confio en...
+PUT     /trusted-users/
+DELETE  /trusted-users/{username}/
+POST    /products/
+DELETE /users/{username}/
+PATCH  /users/{username}/
+PATCH   /products/{productid}/
+DELETE  /products/{productid}/
+POST    /products/{productid}/images
+DELETE  /products/{productid}/images/{image_id}
+GET     /users/{username}/trust/            Esta persona confia en...
+GET     /cart/
+PATCH   /cart/{productId}/        Cambia la cantidad del producto en carrito
+DELETE  /cart/{productId}/        Elimina el producto del carrito
+PUT     /cart/
+PUT     /checkout/                Compra los productos del carrito
+GET    /users/{username}/ratings/
+DELETE /users/{username}/ratings/{ratingid}/
+PUT    /users/{username}/ratings/
+PATCH  /users/{username}/ratings/{ratingid}/
+
+
+-------------------------Used from here up-------------------------
+
+
+-------------------------   In Progress   -------------------------
+
+
+
+

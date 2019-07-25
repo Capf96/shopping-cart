@@ -1,0 +1,30 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:include="/_head"></th:block>
+
+<body>
+<!-- Include _menu.html -->
+<th:block th:include="/_menu"></th:block>
+
+<div style="padding-left: 40px; padding-top: 40px">
+
+    <h2>Update your information</h2>
+
+    <form th:action="@{/addMoney}" method='POST'>
+        <table>
+            <tr>
+                <td>Money:</td>
+                <td><input type='number' step="0.01" name='money' min="0.01"></td>
+            </tr>
+            <tr>
+                <td><input name="submit" type="submit" value="submit" class="btn-primary" /></td>
+            </tr>
+        </table>
+    </form>
+
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:include="/_head"></th:block>
+
+<body>
+<!-- Include _menu.html -->
+<th:block th:include="/_menu"></th:block>
+
+<div style="padding-left: 40px; padding-top: 40px">
+
+    <h2>Add Image</h2>
+
+    <form th:action="@{${'/stores/' + seller + '/' + productId + '/addImage'}}" enctype="multipart/form-data" method='POST'>
+        <input name="imageFile" type="file" required>
+        <input type="submit" value="Upload Image">
+    </form>
+
+</div>
+
+</body>
+
+</html>

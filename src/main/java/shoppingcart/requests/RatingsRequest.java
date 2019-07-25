@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RatingsRequest {
-    @NotNull
     private String rater;
     @NotNull
     @Max(value = 5, message = "Ratings must be lesser or equal to 5")

@@ -1,0 +1,40 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:include="/_head"></th:block>
+
+<body>
+
+<!-- Include _menu.html -->
+<th:block th:include="/_menu"></th:block>
+
+<div class="text-center">
+    <h1>Trusted Users</h1>
+</div>
+
+<div>
+    <div style="width: 40%; float:left">
+        <ul>
+            <div th:each="user: ${trust.getTrustedUsers()}" class="flex-container">
+                <li th:text="${user}"></li>
+                <form th:action="@{${'/trusted-users/' + user + '/delete'}}" method="POST" style="padding-left: 40px">
+                    <input class="btn-danger" type="submit" value="Delete" name="submit">
+                </form>
+            </div>
+        </ul>
+    </div>
+
+    <div style="width: 60%; float:right; padding-left: 20px">
+        <div th:if="${#request.getParameter('error') != null}"
+             style="color:red;margin:10px 0px;">
+            <span th:text="${#request.getParameter('error')}"></span>
+        </div>
+        <form th:action="@{/trusted-users}" method="POST">
+            <input type="text" name="trustee" required>
+            <input name="Trust" type="submit" value="submit" />
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

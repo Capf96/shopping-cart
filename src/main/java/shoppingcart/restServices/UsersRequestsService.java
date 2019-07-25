@@ -18,7 +18,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import shoppingcart.models.AppUser;
+import shoppingcart.models.UserRole;
+import shoppingcart.models.UserRoleIdentity;
+import shoppingcart.repository.JpaAppRoleRepository;
 import shoppingcart.repository.JpaAppUserRepository;
+import shoppingcart.repository.JpaUserRoleRepository;
 import shoppingcart.requests.AppUserPatchRequest;
 import shoppingcart.requests.AppUserRequest;
 import shoppingcart.responses.AppUserResponse;
@@ -26,12 +30,17 @@ import shoppingcart.services.EncryptedPasswordsUtils;;
 
 @Service
 public class UsersRequestsService {
-
     @Autowired
     EncryptedPasswordsUtils encryptor;
     
     @Autowired
     JpaAppUserRepository appUserRepo;
+
+    @Autowired
+    JpaAppRoleRepository appRoleRepo;
+
+    @Autowired
+    JpaUserRoleRepository userRoleRepo;
 
     // GET METHODS
 
@@ -71,17 +80,40 @@ public class UsersRequestsService {
 
     public ResponseEntity<AppUserResponse> managePost(AppUserRequest user) {
         AppUser exists = appUserRepo.findByUsername(user.getUsername());
-        if (exists != null) throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED, "Username already in use");
+        if (exists != null) throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already in use");
 
-        AppUser newUser = AppUser.builder().username(user.getUsername())
-                            .encryptedPassword(encryptor.encryptPassword(user.getPassword())).email(user.getEmail())
-                            .enabled(1).firstName(user.getFirstName()).lastName(user.getLastName())
-                            .phoneNumber(user.getPhoneNumber()).money(user.getMoney()).build();
-        AppUser inserted = appUserRepo.save(newUser);
+        AppUser newUser = AppUser.builder()
+                .username(user.getUsername())
+                .encryptedPassword(encryptor.encryptPassword(user.getPassword()))
+                .email(user.getEmail())
+                .enabled(1)
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .phoneNumber(user.getPhoneNumber())
+                .money((user.getMoney() != null)? user.getMoney(): 0)
+                .build();
+
+        AppUser saved = appUserRepo.save(newUser);
+
+        UserRole userRole = UserRole.builder()
+                .userRole(UserRoleIdentity.builder()
+                        .appUser(saved)
+                        .appRole(appRoleRepo.findByRoleName("ROLE_BUYER"))
+                        .build())
+                .build();
+
+        userRoleRepo.save(userRole);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                AppUserResponse.builder().username(inserted.getUsername())
-                .email(inserted.getEmail()).firstName(inserted.getFirstName()).lastName(inserted.getLastName())
-                .phoneNumber(inserted.getPhoneNumber()).money(inserted.getMoney()).build());
+                AppUserResponse.builder()
+                        .username(saved.getUsername())
+                        .email(saved.getEmail())
+                        .firstName(saved.getFirstName())
+                        .lastName(saved.getLastName())
+                        .phoneNumber(saved.getPhoneNumber())
+                        .money(saved.getMoney())
+                        .enabled(saved.getEnabled())
+                        .build());
     }
 
     // DELETE
@@ -102,12 +134,13 @@ public class UsersRequestsService {
 
         AppUser modified = AppUser.builder()
                 .username(toModify.getUsername())
-                .encryptedPassword(toModify.getEncryptedPassword())
+                .encryptedPassword((patch.getPassword() != null)? encryptor.encryptPassword(patch.getPassword()): toModify.getEncryptedPassword())
                 .email((patch.getEmail() != null)? patch.getEmail(): toModify.getEmail())
                 .firstName((patch.getFirstName() != null)? patch.getFirstName(): toModify.getFirstName())
                 .lastName((patch.getLastName() != null)? patch.getLastName(): toModify.getLastName())
                 .phoneNumber((patch.getPhoneNumber() != null)? patch.getPhoneNumber(): toModify.getPhoneNumber())
                 .money((patch.getMoney() != null)? patch.getMoney(): toModify.getMoney())
+                .enabled((patch.getEnabled() != null)? patch.getEnabled(): toModify.getEnabled())
                 .build();
         AppUser saved = appUserRepo.save(modified);
 
@@ -118,6 +151,7 @@ public class UsersRequestsService {
                 .lastName(saved.getLastName())
                 .phoneNumber(saved.getPhoneNumber())
                 .money(saved.getMoney())
+                .enabled(saved.getEnabled())
                 .build();
     }
 }

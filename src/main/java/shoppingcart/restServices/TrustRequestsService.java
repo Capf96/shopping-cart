@@ -29,24 +29,23 @@ public class TrustRequestsService {
 
     // GET
 
-    public List<TrustResponse> manageGet(String username) {
+    public TrustResponse manageGet(String username) {
         AppUser user = appUserRepo.findByUsername(username);
         if (user == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 
         List<Trust> trustedList = trustRepo.findByTrust_Truster_Username(username);
-        List<TrustResponse> responseList = new ArrayList<>();
+        List<String> trustedUsers = new ArrayList<>();
         for (Trust trust: trustedList) {
-            TrustResponse toAdd = TrustResponse.builder()
-                    .truster(trust.getTrust().getTruster().getUsername())
-                    .trustee(trust.getTrust().getTrustee().getUsername())
-                    .build();
-            responseList.add(toAdd);
+            trustedUsers.add(trust.getTrust().getTrustee().getUsername());
         }
 
-        return responseList;
+        return TrustResponse.builder()
+                .username(user.getUsername())
+                .trustedUsers(trustedUsers)
+                .build();
     }
 
-    public List<TrustResponse> manageGetOwn() {
+    public TrustResponse manageGetOwn() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
         return manageGet(user.getUsername());
@@ -64,10 +63,13 @@ public class TrustRequestsService {
         AppUser trustee = appUserRepo.findByUsername(trustRequest.getTrustee());
         if (trustee == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 
+        if (truster.getUsername().equals(trustee.getUsername()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't trust yourself");
+
         TrustIdentity trustIdentity = TrustIdentity.builder().truster(truster).trustee(trustee).build();
 
         Trust exists = trustRepo.findByTrust(trustIdentity);
-        if (exists != null) throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED, "Trust already in database");
+        if (exists != null) throw new ResponseStatusException(HttpStatus.CONFLICT, "Trust already in database");
 
         Trust newTrust = Trust.builder()
                 .trust(trustIdentity)
@@ -75,9 +77,15 @@ public class TrustRequestsService {
 
         Trust saved = trustRepo.save(newTrust);
 
+        List<Trust> trusted = trustRepo.findByTrust_Truster_Username(user.getUsername());
+        List<String> trustedUsers = new ArrayList<>();
+        for (Trust trust: trusted) {
+            trustedUsers.add(trust.getTrust().getTrustee().getUsername());
+        }
+
         return TrustResponse.builder()
-                .truster(saved.getTrust().getTruster().getUsername())
-                .trustee(saved.getTrust().getTrustee().getUsername())
+                .username(user.getUsername())
+                .trustedUsers(trustedUsers)
                 .build();
     }
 

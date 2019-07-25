@@ -26,16 +26,17 @@ public class SwaggerConfig {
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("shoppingcart.rest"))
                 .paths(PathSelectors.regex("/.*"))
-                .build().apiInfo(apiEndPointsInfo());
+                .build().apiInfo(apiEndPointsInfo())
+                .useDefaultResponseMessages(false);
     }
 
     private ApiInfo apiEndPointsInfo() {
         return new ApiInfoBuilder().title("Shopping Cart REST API")
-            .description("REST API for a fake market")
-            .contact(new Contact("Carlos Pérez", "none", "capf96@gmail.com"))
-            .license("Apache 2.0")
-            .licenseUrl("http://www.apache.org/licenses/LICENSE-2.0.html")
-            .version("1.0.0")
-            .build();
+                .description("REST API for a fake market")
+                .contact(new Contact("Carlos Pérez", null, "capf96@gmail.com"))
+                .license("Apache 2.0")
+                .licenseUrl("http://www.apache.org/licenses/LICENSE-2.0.html")
+                .version("1.0.0")
+                .build();
     }
 }

@@ -33,20 +33,20 @@ public class RolesRequestsService {
 
     // GET
 
-    public List<AppRoleResponse> manageGet(String username) {
+    public UserRoleResponse manageGet(String username) {
         AppUser user = appUserRepo.findByUsername(username);
         if (user == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 
         List<UserRole> userRoles = userRoleRepo.findByUserRole_AppUser_Username(username);
-        List<AppRoleResponse> responseList = new ArrayList<>();
+        List<String> roles = new ArrayList<>();
         for (UserRole role: userRoles) {
-            AppRoleResponse toAdd = AppRoleResponse.builder()
-                    .roleId(role.getUserRole().getAppRole().getRoleId())
-                    .roleName(role.getUserRole().getAppRole().getRoleName())
-                    .build();
-            responseList.add(toAdd);
+
+            roles.add(role.getUserRole().getAppRole().getRoleName());
         }
-        return responseList;
+        return UserRoleResponse.builder()
+                .username(username)
+                .roles(roles)
+                .build();
     }
 
     // PUT
@@ -70,9 +70,16 @@ public class RolesRequestsService {
                 .build();
         UserRole inserted = userRoleRepo.save(toInsert);
 
+        List<UserRole> roles = userRoleRepo.findByUserRole_AppUser_Username(username);
+
+        List<String> roleNames = new ArrayList<>();
+        for (UserRole userRole: roles) {
+            roleNames.add(userRole.getUserRole().getAppRole().getRoleName());
+        }
+
         return UserRoleResponse.builder()
-                .appRoleId(inserted.getUserRole().getAppRole().getRoleId())
                 .username(inserted.getUserRole().getAppUser().getUsername())
+                .roles(roleNames)
                 .build();
     }
 

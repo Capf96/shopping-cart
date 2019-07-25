@@ -66,13 +66,6 @@ public class StoresRequestsService {
                     store.add(toAdd);
                 }
             }
-            // TODO: Verificar si devolver o no una tienda vacia
-//            if (!store.isEmpty()) {
-//                stores.add(StoreResponse.builder()
-//                        .username(seller.getUsername())
-//                        .products(store)
-//                        .build());
-//            }
             stores.add(StoreResponse.builder()
                     .username(seller.getUsername())
                     .products(store)
@@ -93,10 +86,9 @@ public class StoresRequestsService {
         AppUser seller = appUserRepo.findByUsername(username);
         if (seller == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 
-        // TODO: Verificar si el precondition failed es correcto
         UserRole isSeller = userRoleRepo
                 .findByUserRole_AppUser_UsernameAndUserRole_AppRole_RoleName(username, "ROLE_SELLER");
-        if (isSeller == null) throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED, "User is not seller");
+        if (isSeller == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Store not found");
 
         List<Products> sellerProducts = productsRepo.findBySeller(seller);
         List<ProductsStoreResponse> store = new ArrayList<>();

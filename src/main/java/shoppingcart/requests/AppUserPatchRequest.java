@@ -5,11 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Min;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class AppUserPatchRequest {
+    private String password;
+
     private String email;
 
     private String firstName;
@@ -18,7 +22,8 @@ public class AppUserPatchRequest {
 
     private String phoneNumber;
 
-    private Integer enabled;
-
+    @Min(0)
     private Double money;
+
+    private Integer enabled;
 }

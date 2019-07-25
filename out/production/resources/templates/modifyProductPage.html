@@ -1,0 +1,46 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:include="/_head"></th:block>
+
+<body>
+<!-- Include _menu.html -->
+<th:block th:include="/_menu"></th:block>
+
+<div style="padding-left: 40px; padding-top: 40px">
+
+    <h2>Update your information</h2>
+
+    <form name='f' th:action="@{${'/stores/' + product.getSeller() + '/' + product.getProductId() + '/modify'}}" method='POST'>
+        <table>
+            <tr>
+                <td>Name:</td>
+                <td><input type='text' name='name' th:value="${product.getName()}" required/></td>
+            </tr>
+            <tr>
+                <td>Description:</td>
+                <td><input type='text' name='description' th:value="${product.getDescription()}"/></td>
+            </tr>
+            <tr>
+                <td>Price:</td>
+                <td><input type='number' step="0.01" name='price' th:value="${product.getPrice()}" /></td>
+            </tr>
+            <tr>
+                <td>Quantity:</td>
+                <td><input type='number' name='quantity' th:value="${product.getQuantity()}" /></td>
+            </tr>
+            <tr>
+                <td>Visible:</td>
+                <td><input type='checkbox' name='visible' th:value="${product.getVisible()}"/></td>
+            </tr>
+            <tr>
+                <td><input name="submit" type="submit" value="submit" class="btn-primary" /></td>
+            </tr>
+        </table>
+    </form>
+
+</div>
+
+</body>
+
+</html>

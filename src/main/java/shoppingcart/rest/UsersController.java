@@ -1,5 +1,6 @@
 package shoppingcart.rest;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,19 +29,20 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
+import shoppingcart.exceptions.BadlyFormedRequest;
 import shoppingcart.requests.AppUserPatchRequest;
 import shoppingcart.requests.AppUserRequest;
 import shoppingcart.responses.AppUserResponse;
 import shoppingcart.restServices.UsersRequestsService;
 
-@Api(value="Users Management System", description="Operations pertaining to users in Shopping Cart API")
+@Api(description="Operations pertaining to users in Shopping Cart API", tags = "Users")
 @RestController
 @RequestMapping("/api/users/")
 public class UsersController {
     @Autowired
     UsersRequestsService usersRequestsService;
 
-    @ApiOperation(value = "View a list of available users", response = AppUserResponse.class)
+    @ApiOperation(value = "View a list of available users", response = AppUserResponse.class, responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successfully retrieved list"),
             @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
@@ -66,9 +68,10 @@ public class UsersController {
     @ApiOperation(value = "Create a new user", response = AppUserResponse.class)
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successfully created user"),
+            @ApiResponse(code = 400, message = "The request was badly formed"),
             @ApiResponse(code = 401, message = "You are not authorized to create the resource"),
             @ApiResponse(code = 403, message = "Creating the resource you were trying to reach is forbidden"),
-            @ApiResponse(code = 412, message = "Creating the resource is not possible as it fails database precondition")
+            @ApiResponse(code = 409, message = "Creating the resource is not possible as it fails database constraints")
     })
     @PostMapping
     public ResponseEntity <AppUserResponse> createUser(
@@ -76,21 +79,23 @@ public class UsersController {
         return usersRequestsService.managePost(newUser);
     }
 
-    @ApiOperation(value = "Delete an user", response = ResponseEntity.class)
+    @ApiOperation(value = "Delete an user")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successfully deleted user"),
             @ApiResponse(code = 401, message = "You are not authorized to delete the resource"),
             @ApiResponse(code = 403, message = "Accessing the resource you were trying to delete is forbidden"),
             @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
     })
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{username}/")
-    public ResponseEntity<HttpStatus> deleteUser(@PathVariable String username) {
-        return usersRequestsService.manageDelete(username);
+    public void deleteUser(@PathVariable String username) {
+        usersRequestsService.manageDelete(username);
     }
 
     @ApiOperation(value = "Change an user information", response = AppUserResponse.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successfully updated user"),
+            @ApiResponse(code = 400, message = "The request was badly formed"),
             @ApiResponse(code = 401, message = "You are not authorized to update the resource"),
             @ApiResponse(code = 403, message = "Accessing the resource you were trying to update is forbidden"),
             @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
@@ -102,10 +107,16 @@ public class UsersController {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public List<String> handleValidationExceptions(MethodArgumentNotValidException ex) {
-		return ex.getBindingResult()
+	public BadlyFormedRequest handleValidationExceptions(MethodArgumentNotValidException ex) {
+		List<String> details =  ex.getBindingResult()
 			.getAllErrors().stream()
 			.map(ObjectError::getDefaultMessage)
 			.collect(Collectors.toList());
+
+		return BadlyFormedRequest.builder()
+                .timestamp(new Date())
+                .details(details)
+                .status(400)
+                .build();
 	}
 }

@@ -9,6 +9,8 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.server.ResponseStatusException;
+import shoppingcart.exceptions.NotEnoughInInventory;
+import shoppingcart.exceptions.NotEnoughMoney;
 import shoppingcart.models.*;
 import shoppingcart.repository.JpaAppUserRepository;
 import shoppingcart.repository.JpaCartRepository;
@@ -16,16 +18,17 @@ import shoppingcart.repository.JpaProductsRepository;
 import shoppingcart.repository.JpaPurchasesRepository;
 import shoppingcart.requests.CartRequest;
 import shoppingcart.responses.CartResponse;
+import shoppingcart.responses.ProductsResponse;
 import shoppingcart.responses.ProductsStoreResponse;
 import shoppingcart.responses.PurchaseResponse;
 
+import javax.xml.ws.Response;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 @Service
 public class CartRequestsService {
-    // TODO: Only ROLE_BUYER can enter here
     @Autowired
     JpaCartRepository cartRepo;
 
@@ -40,17 +43,18 @@ public class CartRequestsService {
 
     // GET
 
-    public List<ProductsStoreResponse> getProductsInCart() {
+    public List<ProductsResponse> getProductsInCart() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         AppUser user = appUserRepo.findByUsername(((User) authentication.getPrincipal()).getUsername());
 
         List<Cart> items = cartRepo.findByCartId_User(user);
 
-        List<ProductsStoreResponse> response = new ArrayList<>();
+        List<ProductsResponse> response = new ArrayList<>();
         for (Cart item : items) {
             Products product = item.getCartId().getProduct();
-            ProductsStoreResponse toAdd = ProductsStoreResponse.builder()
+            ProductsResponse toAdd = ProductsResponse.builder()
                     .productId(product.getProductId())
+                    .seller(item.getCartId().getProduct().getSeller().getUsername())
                     .name(product.getName())
                     .description(product.getDescription())
                     .price(product.getPrice())
@@ -155,6 +159,7 @@ public class CartRequestsService {
         if (inCart.isEmpty()) throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED, "The cart is empty");
 
         List<ProductsStoreResponse> products = new ArrayList<>();
+        List<Products> notAvailable = new ArrayList<>();
         Double totalPrice = 0.0;
         for (Cart cartProduct: inCart) {
             ProductsStoreResponse toAdd = ProductsStoreResponse.builder()
@@ -165,21 +170,43 @@ public class CartRequestsService {
                     .quantity(cartProduct.getQuantity())
                     .build();
             products.add(toAdd);
+            Products product = cartProduct.getCartId().getProduct();
+
+            if (product.getQuantity() < toAdd.getQuantity()) notAvailable.add(product);
+
             totalPrice += cartProduct.getQuantity() * cartProduct.getCartId().getProduct().getPrice();
         }
 
-        if (user.getMoney() < totalPrice) throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED, "Not enough money on account");
+        if (notAvailable.size() > 0) {
+            List<Long> ids = new ArrayList<>();
+            List<String> names = new ArrayList<>();
+            for (Products product: notAvailable) {
+                ids.add(product.getProductId());
+                names.add(product.getName());
+            }
+            throw new NotEnoughInInventory("Order not completed. Not enough in Inventory", ids, names);
+        }
+
+        if (user.getMoney() < totalPrice) throw new
+                NotEnoughMoney("Order not completed. Not enough money", user.getMoney(), totalPrice);
 
         Date dateOfPurchase = new Date();
 
         for (Cart cartProduct: inCart) {
+            Products modify = cartProduct.getCartId().getProduct();
+            modify.setQuantity(modify.getQuantity() - cartProduct.getQuantity());
+
+            Products saved = productsRepo.save(modify);
+
             purchasesRepo.save(Purchases.builder()
                     .appUser(user)
-                    .product(cartProduct.getCartId().getProduct())
+                    .product(saved)
                     .dateOfPurchase(dateOfPurchase)
                     .price(cartProduct.getCartId().getProduct().getPrice() * cartProduct.getQuantity())
                     .quantity(cartProduct.getQuantity())
                     .build());
+
+            cartRepo.delete(cartProduct);
         }
 
         user.setMoney(user.getMoney() - totalPrice);

@@ -7,13 +7,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.server.ResponseStatusException;
-import shoppingcart.models.AppUser;
-import shoppingcart.models.Products;
-import shoppingcart.models.UserRole;
-import shoppingcart.repository.JpaAppUserRepository;
-import shoppingcart.repository.JpaProductsRepository;
-import shoppingcart.repository.JpaUserRoleRepository;
+import shoppingcart.models.*;
+import shoppingcart.repository.*;
 import shoppingcart.requests.ProductsPatchRequest;
 import shoppingcart.requests.ProductsRequest;
 import shoppingcart.responses.ProductsResponse;
@@ -21,6 +18,7 @@ import shoppingcart.responses.ProductsResponse;
 import javax.validation.constraints.Null;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ProductsRequestsService {
@@ -33,41 +31,91 @@ public class ProductsRequestsService {
     @Autowired
     JpaUserRoleRepository userRoleRepo;
 
+    @Autowired
+    JpaTrustRepository trustRepo;
+
+    @Autowired
+    JpaProductImagesRepository imagesRepo;
+
+    @Autowired
+    ProductImagesRequestsService productImagesRequestsService;
+
     // GET METHODS
 
     public List<ProductsResponse> manageGet() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        boolean checkVisibility = false;
+        boolean admin = false;
+        AppUser user = null;
+        if (authentication.getPrincipal() != "anonymousUser") {
+            user = appUserRepo.findByUsername(((User) authentication.getPrincipal()).getUsername());
+            checkVisibility = true;
+            if (userRoleRepo.findByUserRole_AppUser_UsernameAndUserRole_AppRole_RoleName(user.getUsername(), "ROLE_ADMIN") != null) {
+                admin = true;
+            }
+        }
+
         List<Products> products = productsRepo.findAll();
 
         List<ProductsResponse> responseList = new ArrayList<>();
         for (Products product: products) {
-            ProductsResponse toAdd = ProductsResponse.builder()
+            ProductsResponse.ProductsResponseBuilder toAdd = ProductsResponse.builder()
                     .productId(product.getProductId())
                     .name(product.getName())
                     .description(product.getDescription())
                     .seller(product.getSeller().getUsername())
                     .price(product.getPrice())
-                    .visible(product.getVisible())
-                    .quantity(product.getQuantity())
-                    .build();
-            responseList.add(toAdd);
+                    .quantity(product.getQuantity());
+            if (admin || (checkVisibility && product.getSeller().getUsername().equals(user.getUsername()))) {
+                responseList.add(toAdd.visible(product.getVisible()).build());
+            } else if (checkVisibility &&
+                    trustRepo.findByTrust_Truster_UsernameAndTrust_Trustee_Username(product.getSeller().getUsername(), user.getUsername()) != null) {
+                responseList.add(toAdd.build());
+            } else if (product.getVisible()) {
+                responseList.add(toAdd.build());
+            }
         }
 
         return responseList;
     }
 
     public ProductsResponse manageGetByProductId(Long productId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        boolean checkVisibility = false;
+        boolean admin = false;
+        AppUser user = null;
+        if (authentication.getPrincipal() != "anonymousUser") {
+            user = appUserRepo.findByUsername(((User) authentication.getPrincipal()).getUsername());
+            checkVisibility = true;
+            if (userRoleRepo.findByUserRole_AppUser_UsernameAndUserRole_AppRole_RoleName(user.getUsername(), "ROLE_ADMIN") != null) {
+                admin = true;
+            }
+        }
+
         Products product = productsRepo.findByProductId(productId);
         if (product == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
 
-        return ProductsResponse.builder()
+        if (checkVisibility && !product.getVisible() && !product.getSeller().getUsername().equals(user.getUsername())) {
+            Trust isTrusted = trustRepo.findByTrust_Truster_UsernameAndTrust_Trustee_Username(product.getSeller().getUsername(), user.getUsername());
+            if (isTrusted == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
+        } else if (!checkVisibility && !product.getVisible()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
+        }
+
+        ProductsResponse.ProductsResponseBuilder builder = ProductsResponse.builder()
                 .productId(product.getProductId())
                 .name(product.getName())
                 .description(product.getDescription())
                 .seller(product.getSeller().getUsername())
-                .visible(product.getVisible())
                 .price(product.getPrice())
-                .quantity(product.getQuantity())
-                .build();
+                .quantity(product.getQuantity());
+
+        if (admin || (checkVisibility && product.getSeller().getUsername().equals(user.getUsername())))
+            return builder.visible(product.getVisible()).build();
+
+        return builder.build();
     }
 
     // POST
@@ -141,7 +189,7 @@ public class ProductsRequestsService {
 
     // DELETE
 
-    public ResponseEntity <HttpStatus> manageDelete(Long productId) {
+    public void manageDelete(Long productId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication.getPrincipal() == "anonymousUser") throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 
@@ -155,9 +203,13 @@ public class ProductsRequestsService {
         if (isAdmin == null || !user.getUsername().equals(toDelete.getSeller().getUsername()))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 
-        productsRepo.delete(toDelete);
+        List<ProductImages> images = imagesRepo.findByProduct_ProductId(toDelete.getProductId());
 
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        for (ProductImages image : images) {
+            productImagesRequestsService.deleteImage(image.getProduct().getProductId(), image.getProductImageId());
+        }
+
+        productsRepo.delete(toDelete);
     }
 
 }

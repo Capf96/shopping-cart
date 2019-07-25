@@ -1,0 +1,28 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:include="/_head"></th:block>
+
+<body>
+
+<!-- Include _menu.html -->
+<th:block th:include="/_menu"></th:block>
+<a th:href="${'/stores/' + seller + '/' + productId}"><- Go back</a>
+<div class="text-center">
+    <h2><span th:text="${productId}"></span></h2>
+</div>
+<div class="flex-container">
+    <div th:each="image: ${images}" class="invisible-barrier">
+        <div class="text-center">
+                <div>
+                    <img width="200" height="auto" th:src="${'/' + image.getPath()}">
+                </div>
+                <form th:action="${'/stores/' + seller + '/' + productId + '/deleteImage/' + image.getProductImageId()}" method="POST">
+                    <input type="submit" value="Delete" class="btn-danger" />
+                </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -26,7 +26,5 @@ public class AppUserRequest {
 
     private String phoneNumber;
 
-    private Integer enabled;
-    
     private Double money;
 }

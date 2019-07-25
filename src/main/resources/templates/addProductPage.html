@@ -1,0 +1,40 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:include="/_head"></th:block>
+
+<body>
+
+<!-- Include _menu.html -->
+<th:block th:include="/_menu"></th:block>
+
+<form name='f' th:action="@{/add-product}" method='POST' style="padding-left: 40px; padding-top: 40px">
+    <table>
+        <tr>
+            <td>Name:</td>
+            <td><input type='text' name='name' required /></td>
+        </tr>
+        <tr>
+            <td>Description:</td>
+            <td><input type='text' name='description' /></td>
+        </tr>
+        <tr>
+            <td>Price:</td>
+            <td><input type='number' step="0.01" name='price' required /></td>
+        </tr>
+        <tr>
+            <td>Quantity:</td>
+            <td><input type='number' name='quantity' required /></td>
+        </tr>
+        <tr>
+            <td>Visible:</td>
+            <td><input type='checkbox' name='visible' checked /></td>
+        </tr>
+        <tr>
+            <td><input class="btn-primary" name="submit" type="submit" value="Add" /></td>
+        </tr>
+    </table>
+</form>
+
+</body>
+</html>

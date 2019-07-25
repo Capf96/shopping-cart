@@ -1,5 +1,6 @@
 package shoppingcart.restServices;
 
+import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,9 +13,11 @@ import org.springframework.web.server.ResponseStatusException;
 import shoppingcart.models.AppUser;
 import shoppingcart.models.ProductImages;
 import shoppingcart.models.Products;
+import shoppingcart.models.Trust;
 import shoppingcart.repository.JpaAppUserRepository;
 import shoppingcart.repository.JpaProductImagesRepository;
 import shoppingcart.repository.JpaProductsRepository;
+import shoppingcart.repository.JpaTrustRepository;
 import shoppingcart.responses.ProductImagesResponse;
 
 import java.io.IOException;
@@ -36,9 +39,25 @@ public class ProductImagesRequestsService {
     @Autowired
     JpaProductImagesRepository imagesRepo;
 
+    @Autowired
+    JpaTrustRepository trustRepo;
+
     // GET
 
     public List<ProductImagesResponse> getProductImages(Long productId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        Products product = productsRepo.findByProductId(productId);
+        if (product == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
+
+        if (authentication.getPrincipal() != "anonymousUser" && !product.getVisible()) {
+            String username = ((User) authentication.getPrincipal()).getUsername();
+            Trust isTrusted = trustRepo.findByTrust_Truster_UsernameAndTrust_Trustee_Username(product.getSeller().getUsername(), username);
+            if (isTrusted == null && !product.getSeller().getUsername().equals(username)) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
+        } else if (!product.getVisible()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
+        }
+
         List<ProductImages> images =  imagesRepo.findByProduct_ProductId(productId);
 
         List<ProductImagesResponse> responseList = new ArrayList<>();
@@ -58,15 +77,17 @@ public class ProductImagesRequestsService {
     // POST
 
     public ProductImagesResponse saveImage(Long productId, MultipartFile imageFile) {
-        // TODO: only admin or owner
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        AppUser user = appUserRepo.findByUsername(((User) authentication.getPrincipal()).getUsername());
+        String username = ((User) authentication.getPrincipal()).getUsername();
+        AppUser user = appUserRepo.findByUsername(username);
 
         Products product = productsRepo.findByProductId(productId);
         if (product == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
 
+        if (!product.getSeller().getUsername().equals(user.getUsername()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Can't modify the product");
+
         Path currentPath = Paths.get(".");
-        Path absolutePath = currentPath.toAbsolutePath();
 
         String originalFilename = imageFile.getOriginalFilename();
 
@@ -81,29 +102,21 @@ public class ProductImagesRequestsService {
                 ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Only jpg, jpeg or png allowed");
 
         ProductImages newImage = ProductImages.builder()
-                .path(absolutePath + "/src/main/resources/images/" + user.getUsername() + "/")
+                .path( "images/")
                 .product(product)
                 .build();
 
         ProductImages generateId = imagesRepo.save(newImage);
 
-        String checkDirectories = generateId.getPath();
-
         generateId.setPath(generateId.getPath() + productId + "_" + generateId.getProductImageId() + "." + extension.get());
 
         ProductImages saved = imagesRepo.save(generateId);
 
-        boolean dirExists = Files.exists(Paths.get(checkDirectories));
+        String imageLocation = "./";
 
         try {
-            if(!dirExists) {
-                Files.createDirectories(Paths.get(checkDirectories));
-            }
-
             byte[] bytes = imageFile.getBytes();
-            Path path = Paths.get(saved.getPath());
-            System.out.println(path);
-            Files.write(path, bytes);
+            Files.write(Paths.get(imageLocation + saved.getPath()), bytes);
         } catch (IOException ioExceptionObj) {
             imagesRepo.delete(saved);
             throw new ResponseStatusException(HttpStatus.I_AM_A_TEAPOT);
@@ -118,14 +131,14 @@ public class ProductImagesRequestsService {
 
     // DELETE
 
-    public ResponseEntity <HttpStatus> deleteImage(Long productId, Long productImageId) {
+    public void deleteImage(Long productId, Long productImageId) {
         Products product = productsRepo.findByProductId(productId);
         if (product == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
 
         ProductImages image = imagesRepo.findByProductImageId(productImageId);
         if (image == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found");
 
-        Path path = Paths.get(image.getPath());
+        Path path = Paths.get("./" + image.getPath());
         imagesRepo.delete(image);
 
         try {
@@ -133,7 +146,5 @@ public class ProductImagesRequestsService {
         } catch (IOException ioExceptionObj) {
             throw new ResponseStatusException(HttpStatus.I_AM_A_TEAPOT);
         }
-
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

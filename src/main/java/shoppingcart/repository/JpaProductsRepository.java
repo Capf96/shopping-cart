@@ -7,6 +7,6 @@ import shoppingcart.models.Products;
 import java.util.List;
 
 public interface JpaProductsRepository extends JpaRepository<Products, Long> {
-    public Products findByProductId(Long productId);
-    public List<Products> findBySeller(AppUser seller);
+    Products findByProductId(Long productId);
+    List<Products> findBySeller(AppUser seller);
 }

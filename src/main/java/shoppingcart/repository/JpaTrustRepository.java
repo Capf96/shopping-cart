@@ -9,6 +9,7 @@ import shoppingcart.models.TrustIdentity;
 import java.util.List;
 
 public interface JpaTrustRepository extends JpaRepository<Trust, TrustIdentity> {
-    public List<Trust> findByTrust_Truster_Username(String username);
-    public Trust findByTrust(TrustIdentity trust);
+    List<Trust> findByTrust_Truster_Username(String username);
+    Trust findByTrust_Truster_UsernameAndTrust_Trustee_Username(String truster, String trustee);
+    Trust findByTrust(TrustIdentity trust);
 }

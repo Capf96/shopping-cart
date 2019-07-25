@@ -1,0 +1,33 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:include="/_head"></th:block>
+
+<body>
+
+<!-- Include _menu.html -->
+<th:block th:include="/_menu"></th:block>
+
+<h2>Products in store</h2>
+
+<div class="text-center">
+    <h2><span th:text="${store.getSeller() + 's Store'}"></span></h2>
+</div>
+<div class="flex-container">
+    <div th:each="product: ${store.getProducts()}" class="invisible-barrier">
+        <div class="text-center">
+            <a th:href="${'/stores/' + product.getSeller() + '/' + product.getProductId()}">
+                <span th:text="${product.getName()}"> Name </span>
+                <div th:if="${!product.getImages().isEmpty()}">
+                    <img width="400" height="auto" th:src="${'/' + product.getImages()[0].getPath()}">
+                </div>
+                <div th:if="${product.getImages().isEmpty()}">
+                    <img width="400" height="auto" th:src="${'/images/NoImage.png'}">
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

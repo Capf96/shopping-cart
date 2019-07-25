@@ -1,0 +1,64 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:include="/_head"></th:block>
+
+<body>
+<!-- Include _menu.html -->
+<th:block th:include="/_menu"></th:block>
+
+<div style="padding-left: 40px; padding-top: 40px">
+
+    <h2>User Info Page</h2>
+    <h3><span th:utext="${user.getUsername()}"></span></h3>
+
+    <br/><br/>
+
+    <div>
+        <h4>Name: <span th:utext="${user.getFirstName() + ' ' + user.getLastName()}"></span></h4>
+        <h4>Email: <span th:utext="${user.getEmail()}"></span></h4>
+        <h4>Money: <span th:utext="${user.getMoney()}"></span></h4>
+    </div>
+
+
+    <div sec:authorize="hasRole('ROLE_ADMIN')">
+        <form th:action="@{${'/users/' + roles.getUsername() + '/updateRoles'}}" method="POST">
+            <input hidden="hidden" th:value="${roles.getUsername()}" name="username" />
+            <input type="checkbox" th:checked="${roles.getRoles().contains('ROLE_BUYER')}" name="buyer"> Buyer<br>
+            <input type="checkbox" th:checked="${roles.getRoles().contains('ROLE_SELLER')}" name="seller"> Seller<br>
+            <input type="checkbox" th:checked="${roles.getRoles().contains('ROLE_ADMIN')}" name="admin"> Admin<br>
+            <input name="submit" type="submit" value="Update Roles" class="btn-primary"/>
+        </form>
+        <form style="padding-top: 20px" th:action="@{${'/users/' + roles.getUsername() + '/delete'}}" method="POST">
+            <input name="submit" type="submit" value="Delete User" class="btn-danger"/>
+        </form>
+    </div>
+
+    <div sec:authorize="hasRole('ROLE_BUYER')" th:if="${!sameUser}">
+        <form th:action="@{${'/users/' + user.getUsername() + '/addRating'}}" method="POST">
+            <input type="number" min="1" max="5" name="rating" required>
+            <input type="submit" value="Rate" class="btn-warning">
+        </form>
+    </div>
+    <div>
+        <ul>
+            <li th:each="rating: ${ratings.getRatings()}">
+                User: <span th:text="${rating.getRater()}"></span> Rating: <span th:text="${rating.getRating()}"></span>
+                <div th:if="${#request.userPrincipal.name.equals(rating.getRater())}">
+                    <a th:href="${'/users/' + ratings.getUsername() + '/deleteRating/' + rating.getRatingId()}" class="btn btn-danger">Delete rating</a>
+                </div>
+                <div th:if="${#request.userPrincipal.name.equals(rating.getRater())}">
+                    <form th:action="@{${'/users/' + user.getUsername() + '/updateRating'}}" method="POST">
+                        <input type="text" name="ratingId" th:value="${rating.getRatingId()}" hidden>
+                        <input type="number" th:value="${rating.getRating()}" name="rating" required>
+                        <input type="submit" value="Update Rating" class="btn-primary">
+                    </form>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+</body>
+
+</html>

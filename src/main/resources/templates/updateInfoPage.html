@@ -1,0 +1,50 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:include="/_head"></th:block>
+
+<body>
+<!-- Include _menu.html -->
+<th:block th:include="/_menu"></th:block>
+
+<div style="padding-left: 40px; padding-top: 40px">
+
+    <h2>Update your information</h2>
+
+    <form name='f' th:action="@{/updateInfo}" method='POST'>
+        <table>
+            <tr>
+                <td>Username:</td>
+                <td><input type='text' name='username' th:value="${user.getUsername()}" disabled></td>
+            </tr>
+            <tr>
+                <td>Password:</td>
+                <td><input type='password' name='password'/></td>
+            </tr>
+            <tr>
+                <td>First Name:</td>
+                <td><input type='text' name='firstName' th:value="${user.getFirstName()}" /></td>
+            </tr>
+            <tr>
+                <td>Last Name:</td>
+                <td><input type='text' name='lastName' th:value="${user.getLastName()}"/></td>
+            </tr>
+            <tr>
+                <td>Email:</td>
+                <td><input type='email' name='email' th:value="${user.getEmail()}" /></td>
+            </tr>
+            <tr>
+                <td>Phone Number:</td>
+                <td><input type='text' name='phoneNumber' th:value="${user.getPhoneNumber()}" /></td>
+            </tr>
+            <tr>
+                <td><input name="submit" type="submit" value="submit" class="btn-primary" /></td>
+            </tr>
+        </table>
+    </form>
+
+</div>
+
+</body>
+
+</html>
